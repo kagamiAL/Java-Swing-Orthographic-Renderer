@@ -82,4 +82,17 @@ public class Vector3 {
                 (x * other.y) - (y * other.x)
         );
     }
+
+    /**
+     * For debugging prints out the Vector3
+     * @return string representation of the object
+     */
+    @Override
+    public String toString() {
+        return "Vector3{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
+    }
 }
