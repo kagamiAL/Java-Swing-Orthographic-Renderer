@@ -87,6 +87,14 @@ public class Vector3 {
     }
 
     /**
+     * Returns the vector in unit distance
+     * @return the unit vector
+     */
+    public Vector3 unit(){
+        return new Vector3(x/length(), y/length(), z/length());
+    }
+
+    /**
      * For debugging prints out the Vector3
      * @return string representation of the object
      */
