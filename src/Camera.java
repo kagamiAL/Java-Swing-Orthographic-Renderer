@@ -1,8 +1,8 @@
 public class Camera {
 
-    public static final Vector3 UP_VECTOR = new Vector3(0, 1, 0);
+    public static final Vector3 GLOBAL_UP = new Vector3(0, 1, 0);
 
-    public static final Vector3 RIGHT_VECTOR = new Vector3(1, 0, 0);
+    public static final Vector3 GLOBAL_RIGHT = new Vector3(1, 0, 0);
 
     private Vector3 lookVector = new Vector3(0, 0, -1);
 
@@ -17,18 +17,18 @@ public class Camera {
         this.width = width;
     }
 
-    private Vector3[] getProjectedVertices(Vector3[] vertices){
+    private Vector3[] getProjectedVertices(Vector3[] vertices, int scale){
         int screenOriginX = width/2 - 1;
         int screenOriginY = height/2 - 1;
-        Vector3 localRight = lookVector.cross(UP_VECTOR);
+        Vector3 localRight = lookVector.cross(GLOBAL_UP);
         Vector3 localUp = localRight.cross(lookVector);
         Vector3[] projectedVertices = new Vector3[vertices.length];
 
         for (int x = 0; x < vertices.length; x++) {
-            Vector3 planeVertex = vertices[x].sub(vertices[x].project(lookVector));
-
+            Vector3 vertex = vertices[x].multiply(scale);
+            Vector3 planeVertex = vertex.sub(vertex.project(lookVector));
+            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY + localUp.dot(planeVertex), -vertex.z);
         }
-
 
         return projectedVertices;
     }
