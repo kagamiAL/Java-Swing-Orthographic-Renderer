@@ -9,13 +9,14 @@ public class Vector3 {
 
     public double  z = 0;
 
+    private final double length;
+
     public Vector3(double x, double y, double z){
         this.x = x;
         this.y = y;
         this.z = z;
+        this.length =  Math.sqrt(x*x + y*y + z*z);
     }
-
-    public Vector3(){};
 
     /**
      * Adds a vector to another
@@ -58,7 +59,7 @@ public class Vector3 {
      * @return the length of the vector
      */
     public double length(){
-        return Math.sqrt(x*x + y*y + z*z);
+        return length;
     }
 
     /**
