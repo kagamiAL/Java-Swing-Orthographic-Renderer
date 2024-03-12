@@ -46,6 +46,14 @@ public class Camera {
         }else label.setIcon(new ImageIcon(image));
     }
 
+    private static double getDepthZ(Vector3 p1, Vector3 p2, Vector3 p3, Vector2 pixel){
+        double det = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+        double l1  = ((p2.y - p3.y) * (pixel.x - p3.x) + (p3.x - p2.x) * (pixel.y - p3.y))/det;
+        double l2 = ((p3.y - p1.y) * (pixel.x - p3.x) + (p1.x - p3.x) * (pixel.y - p3.y))/det;
+        double l3 = 1. - l1 - l2;
+        return l1 * p1.z + l2 * p2.z + l3 * p3.z;
+    }
+
     private static boolean edgeFunction(Vector3 a, Vector3 b, Vector2 p){
         return (a.x - b.x) * (p.y - a.y) - (a.y - b.y) * (p.x - a.x) >= 0;
     }
@@ -81,7 +89,7 @@ public class Camera {
         for (int x = 0; x < vertices.length; x++) {
             Vector3 vertex = vertices[x].multiply(scale);
             Vector3 planeVertex = vertex.sub(vertex.project(lookVector));
-            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY + localUp.dot(planeVertex), -vertex.z);
+            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY + localUp.dot(planeVertex), vertex.z);
         }
 
         return projectedVertices;
@@ -96,10 +104,12 @@ public class Camera {
         WritableRaster raster = bufferedImage.getRaster();
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices(), item3D.getScale());
         int[] frameBuffer = new int[width * height];
+        double[] zBuffer = new double[width * height];
+        Arrays.fill(zBuffer, Integer.MAX_VALUE);
         Arrays.fill(frameBuffer, Color.white.getRGB());
         for (int[] face: item3D.getFaces()){
             Vector2[] boxMinMax = getBoundingBoxMinMax(projectedVertices, face);
-            int greyScale = (int)(Math.max(0, getFaceNormal(projectedVertices, face).dot(lightDirection))*GREY_MAX);
+            int greyScale = (int)(Math.round(Math.max(0, getFaceNormal(projectedVertices, face).dot(lightDirection))*GREY_MAX));
             int xMin = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[0].x)));
             int yMin = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[0].y)));
             int xMax = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[1].x)));
@@ -112,10 +122,19 @@ public class Camera {
                     inside &= edgeFunction(projectedVertices[face[1]], projectedVertices[face[2]], pixel);
                     inside &= edgeFunction(projectedVertices[face[2]], projectedVertices[face[0]], pixel);
                     if (inside){
-                        int rgb = greyScale;
-                        rgb = (rgb << 8) + greyScale;
-                        rgb = (rgb << 8) + greyScale;
-                        frameBuffer[y * width + x] = rgb;
+                        double depth = getDepthZ(
+                                projectedVertices[face[0]],
+                                projectedVertices[face[1]],
+                                projectedVertices[face[2]],
+                                pixel
+                        );
+                        if (depth < zBuffer[y * width + x]){
+                            int rgb = greyScale;
+                            rgb = (rgb << 8) + greyScale;
+                            rgb = (rgb << 8) + greyScale;
+                            zBuffer[y * width + x] = depth;
+                            frameBuffer[y * width + x] = rgb;
+                        }
                     }
                 }
             }
