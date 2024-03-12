@@ -10,7 +10,11 @@ public class Camera {
 
     public static final Vector3 GLOBAL_RIGHT = new Vector3(1, 0, 0);
 
+    public static final int GREY_MAX = 175;
+
     private Vector3 lookVector = new Vector3(0, 0, -1);
+
+    private Vector3 lightDirection = new Vector3(0, 0, -1);
 
     private int height = 512;
 
@@ -44,6 +48,12 @@ public class Camera {
 
     private static boolean edgeFunction(Vector3 a, Vector3 b, Vector2 p){
         return (a.x - b.x) * (p.y - a.y) - (a.y - b.y) * (p.x - a.x) >= 0;
+    }
+
+    private static Vector3 getFaceNormal(Vector3[] vertices, int[] face){
+        Vector3 v = vertices[face[1]].sub(vertices[face[0]]);
+        Vector3 u = vertices[face[2]].sub(vertices[face[0]]);
+        return v.cross(u).unit();
     }
 
     private static Vector2[] getBoundingBoxMinMax(Vector3[] vertices, int[] face){
@@ -89,6 +99,7 @@ public class Camera {
         Arrays.fill(frameBuffer, Color.white.getRGB());
         for (int[] face: item3D.getFaces()){
             Vector2[] boxMinMax = getBoundingBoxMinMax(projectedVertices, face);
+            int greyScale = (int)(Math.max(0, getFaceNormal(projectedVertices, face).dot(lightDirection))*GREY_MAX);
             int xMin = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[0].x)));
             int yMin = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[0].y)));
             int xMax = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[1].x)));
@@ -101,7 +112,10 @@ public class Camera {
                     inside &= edgeFunction(projectedVertices[face[1]], projectedVertices[face[2]], pixel);
                     inside &= edgeFunction(projectedVertices[face[2]], projectedVertices[face[0]], pixel);
                     if (inside){
-                        frameBuffer[y * width + x] = Color.black.getRGB();
+                        int rgb = greyScale;
+                        rgb = (rgb << 8) + greyScale;
+                        rgb = (rgb << 8) + greyScale;
+                        frameBuffer[y * width + x] = rgb;
                     }
                 }
             }
