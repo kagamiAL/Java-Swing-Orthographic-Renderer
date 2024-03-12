@@ -26,4 +26,8 @@ public class Item3D {
     public int[][] getFaces() {
         return faces;
     }
+
+    public Vector3[] getVertices() {
+        return vertices;
+    }
 }
