@@ -19,8 +19,8 @@ public class Item3D {
         return scale;
     }
 
-    public Vector3[] getVertices() {
-        return vertices;
+    public Vector3 getVertexAt(int index) {
+        return vertices[index];
     }
 
     public int[][] getFaces() {
