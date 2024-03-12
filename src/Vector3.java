@@ -9,13 +9,12 @@ public class Vector3 {
 
     public double  z = 0;
 
-    private final double length;
+    private double length = -1;
 
     public Vector3(double x, double y, double z){
         this.x = x;
         this.y = y;
         this.z = z;
-        this.length =  Math.sqrt(x*x + y*y + z*z);
     }
 
     /**
@@ -59,6 +58,9 @@ public class Vector3 {
      * @return the length of the vector
      */
     public double length(){
+        if (length == -1){
+            length = Math.sqrt(x*x + y*y + z*z);
+        }
         return length;
     }
 
