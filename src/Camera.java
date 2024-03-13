@@ -24,11 +24,16 @@ public class Camera {
 
     private static JLabel label;
 
-    public Camera(){}
+    private static BufferedImage bufferedImage;
+
+    public Camera(){
+        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    }
 
     public Camera(int height, int width){
         this.height = height;
         this.width = width;
+        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     }
 
     private static void display(BufferedImage image){
@@ -108,7 +113,6 @@ public class Camera {
     }
 
     public void render(Item3D item3D){
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         WritableRaster raster = bufferedImage.getRaster();
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices(), item3D.getScale());
         int[] frameBuffer = new int[width * height];
