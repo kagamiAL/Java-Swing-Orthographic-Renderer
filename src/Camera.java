@@ -14,6 +14,18 @@ public class Camera {
 
     private Vector3 lightDirection = new Vector3(0, 0, -1);
 
+    private final double[][] projectionMatrix = {
+            {0, 0, 0},
+            {0, 0, 0},
+            {0, 0, 0},
+    };
+
+    private final double[][] identityMatrix = {
+            {1, 0, 0},
+            {0, 1, 0},
+            {0, 0, 1}
+    };
+
     private int invertScale = 1;
 
     private int height = 512;
@@ -26,14 +38,18 @@ public class Camera {
 
     private static BufferedImage bufferedImage;
 
+    private static WritableRaster raster;
+
     public Camera(){
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        raster = bufferedImage.getRaster();
     }
 
     public Camera(int height, int width){
         this.height = height;
         this.width = width;
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        raster = bufferedImage.getRaster();
     }
 
     private static void display(BufferedImage image){
@@ -93,11 +109,28 @@ public class Camera {
 
         for (int x = 0; x < vertices.length; x++) {
             Vector3 vertex = vertices[x].multiply(scale);
-            Vector3 planeVertex = vertex.sub(vertex.project(lookVector));
+            Vector3 planeVertex = getProjectedVector(vertex);
             projectedVertices[x] = new Vector3(screenOriginX + invertScale*localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), -invertScale*vertex.z);
         }
 
         return projectedVertices;
+    }
+
+    private Vector3 getProjectedVector(Vector3 vertex){
+        return new Vector3(
+                projectionMatrix[0][0] * vertex.x + projectionMatrix[0][1] * vertex.y + projectionMatrix[0][2] * vertex.z,
+                projectionMatrix[1][0] * vertex.x + projectionMatrix[1][1] * vertex.y + projectionMatrix[1][2] * vertex.z,
+                projectionMatrix[2][0] * vertex.x + projectionMatrix[2][1] * vertex.y + projectionMatrix[2][2] * vertex.z
+        );
+    }
+
+    private void calculateProjectionMatrix(){
+        double[] vector = lookVector.toArray();
+        for (int x = 0; x < 3; x++){
+            for (int y = 0; y < 3; y++){
+                projectionMatrix[x][y] = identityMatrix[x][y] - (vector[x]*vector[y]);
+            }
+        }
     }
 
     public void setLookVector(Vector3 lookVector) {
@@ -113,7 +146,8 @@ public class Camera {
     }
 
     public void render(Item3D item3D){
-        WritableRaster raster = bufferedImage.getRaster();
+        this.lookVector = lookVector.unit();
+        calculateProjectionMatrix();
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices(), item3D.getScale());
         int[] frameBuffer = new int[width * height];
         double[] zBuffer = new double[width * height];

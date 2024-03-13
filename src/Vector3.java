@@ -94,6 +94,10 @@ public class Vector3 {
         return new Vector3(x/length(), y/length(), z/length());
     }
 
+    public double[] toArray(){
+        return new double[]{x, y, z};
+    }
+
     /**
      * For debugging prints out the Vector3
      * @return string representation of the object
