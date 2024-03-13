@@ -8,8 +8,6 @@ public class Camera {
 
     public static final Vector3 GLOBAL_UP = new Vector3(0, 1, 0);
 
-    public static final Vector3 GLOBAL_RIGHT = new Vector3(1, 0, 0);
-
     public static final int GREY_MAX = 175;
 
     private Vector3 lookVector = new Vector3(0, 0, -1);
@@ -97,6 +95,10 @@ public class Camera {
 
     public void setLookVector(Vector3 lookVector) {
         this.lookVector = lookVector;
+    }
+
+    public void setLightDirection(Vector3 lightDirection) {
+        this.lightDirection = lightDirection;
     }
 
     public void render(Item3D item3D){
