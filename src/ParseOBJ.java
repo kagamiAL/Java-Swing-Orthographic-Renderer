@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ParseOBJ {
 
@@ -7,20 +8,23 @@ public class ParseOBJ {
         return values.trim().split("\\s+");
     }
 
-    private static Vector3 parseVector3(String values){
-        String[] separated = splitValues(values);
+    private static Vector3 parseVector3(String[] values){
         return new Vector3(
-                Double.parseDouble(separated[0]),
-                Double.parseDouble(separated[1]),
-                Double.parseDouble(separated[2])
+                Double.parseDouble(values[0]),
+                Double.parseDouble(values[1]),
+                Double.parseDouble(values[2])
         );
     }
 
-    private static int[] parseFace(String values){
-        String[] separated = splitValues(values);
+    private static int[] parseFace(String[] values){
         int[] face = new int[3];
         for (int x = 0; x < face.length; x++){
-            face[x] = Integer.parseInt(separated[x]) - 1;
+            if (values[x].contains("/")){
+                String[] subValues = values[x].split("/+");
+                face[x] = Integer.parseInt(subValues[0]) - 1;
+            } else {
+                face[x] = Integer.parseInt(values[x]) - 1;
+            }
         }
         return face;
     }
@@ -33,10 +37,10 @@ public class ParseOBJ {
             String line;
             while ((line = bufferedReader.readLine()) != null){
                 if (!line.isEmpty()) {
-                    if (line.charAt(0) == 'v') {
-                        vertices.add(parseVector3(line.substring(1)));
-                    } else if (line.charAt(0) == 'f') {
-                        faces.add(parseFace(line.substring(1)));
+                    String[] values = splitValues(line);
+                    switch (values[0]){
+                        case "v" -> vertices.add(parseVector3(Arrays.copyOfRange(values, 1, values.length)));
+                        case "f" -> faces.add(parseFace(Arrays.copyOfRange(values, 1, values.length)));
                     }
                 }
             }
