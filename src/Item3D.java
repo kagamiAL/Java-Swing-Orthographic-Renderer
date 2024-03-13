@@ -13,14 +13,9 @@ public class Item3D {
 
     public void setScale(int scale) {
         this.scale = scale;
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    public Vector3 getVertexAt(int index) {
-        return vertices[index];
+        for (int x = 0; x < vertices.length; x++){
+            vertices[x] = vertices[x].multiply(scale);
+        }
     }
 
     public int[][] getFaces() {

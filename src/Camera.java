@@ -26,8 +26,6 @@ public class Camera {
             {0, 0, 1}
     };
 
-    private int invertScale = 1;
-
     private int height = 512;
 
     private int width = 512;
@@ -102,7 +100,7 @@ public class Camera {
         return new double[]{minX, minY, maxX, maxY};
     }
 
-    private Vector3[] getProjectedVertices(Vector3[] vertices, int scale){
+    private Vector3[] getProjectedVertices(Vector3[] vertices){
         int screenOriginX = width/2 - 1;
         int screenOriginY = height/2 - 1;
         Vector3 localRight = lookVector.cross(GLOBAL_UP).unit();
@@ -110,9 +108,8 @@ public class Camera {
         Vector3[] projectedVertices = new Vector3[vertices.length];
 
         for (int x = 0; x < vertices.length; x++) {
-            Vector3 vertex = vertices[x].multiply(scale);
-            Vector3 planeVertex = getProjectedVector(vertex);
-            projectedVertices[x] = new Vector3(screenOriginX + invertScale*localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), -invertScale*vertex.z);
+            Vector3 planeVertex = getProjectedVector(vertices[x]);
+            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), -vertices[x].z);
         }
 
         return projectedVertices;
@@ -143,13 +140,9 @@ public class Camera {
         this.lightDirection = lightDirection;
     }
 
-    public void setInvertScale(int invertScale) {
-        this.invertScale = invertScale;
-    }
-
     public void render(Item3D item3D){
         calculateProjectionMatrix();
-        Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices(), item3D.getScale());
+        Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices());
         int[] frameBuffer = new int[width * height];
         double[] zBuffer = new double[width * height];
         Arrays.fill(zBuffer, Integer.MAX_VALUE);
