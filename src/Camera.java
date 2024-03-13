@@ -14,6 +14,8 @@ public class Camera {
 
     private Vector3 lightDirection = new Vector3(0, 0, -1);
 
+    private int invertScale = 1;
+
     private int height = 512;
 
     private int width = 512;
@@ -87,7 +89,7 @@ public class Camera {
         for (int x = 0; x < vertices.length; x++) {
             Vector3 vertex = vertices[x].multiply(scale);
             Vector3 planeVertex = vertex.sub(vertex.project(lookVector));
-            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), -vertex.z);
+            projectedVertices[x] = new Vector3(screenOriginX + invertScale*localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), -invertScale*vertex.z);
         }
 
         return projectedVertices;
@@ -99,6 +101,10 @@ public class Camera {
 
     public void setLightDirection(Vector3 lightDirection) {
         this.lightDirection = lightDirection;
+    }
+
+    public void setInvertScale(int invertScale) {
+        this.invertScale = invertScale;
     }
 
     public void render(Item3D item3D){
