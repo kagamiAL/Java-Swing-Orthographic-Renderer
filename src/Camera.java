@@ -89,7 +89,7 @@ public class Camera {
         for (int x = 0; x < vertices.length; x++) {
             Vector3 vertex = vertices[x].multiply(scale);
             Vector3 planeVertex = vertex.sub(vertex.project(lookVector));
-            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY + localUp.dot(planeVertex), vertex.z);
+            projectedVertices[x] = new Vector3(screenOriginX - localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), vertex.z);
         }
 
         return projectedVertices;
