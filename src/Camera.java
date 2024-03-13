@@ -82,8 +82,8 @@ public class Camera {
     private Vector3[] getProjectedVertices(Vector3[] vertices, int scale){
         int screenOriginX = width/2 - 1;
         int screenOriginY = height/2 - 1;
-        Vector3 localRight = lookVector.cross(GLOBAL_UP);
-        Vector3 localUp = localRight.cross(lookVector);
+        Vector3 localRight = lookVector.cross(GLOBAL_UP).unit();
+        Vector3 localUp = localRight.cross(lookVector).unit();
         Vector3[] projectedVertices = new Vector3[vertices.length];
 
         for (int x = 0; x < vertices.length; x++) {
