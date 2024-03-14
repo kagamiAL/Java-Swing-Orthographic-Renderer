@@ -18,6 +18,10 @@ public class Camera {
 
     private final float[] identityMatrix = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
+    private final int[] frameBuffer;
+
+    private final float[] zBuffer;
+
     private int height = 512;
 
     private int width = 512;
@@ -30,16 +34,13 @@ public class Camera {
 
     private static WritableRaster raster;
 
-    public Camera(){
-        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        raster = bufferedImage.getRaster();
-    }
-
     public Camera(int height, int width){
         this.height = height;
         this.width = width;
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         raster = bufferedImage.getRaster();
+        frameBuffer = new int[width * height];
+        zBuffer = new float[frameBuffer.length];
     }
 
     private static void display(BufferedImage image){
@@ -137,8 +138,6 @@ public class Camera {
     public void render(Item3D item3D){
         calculateProjectionMatrix();
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices());
-        int[] frameBuffer = new int[width * height];
-        float[] zBuffer = new float[width * height];
         Arrays.fill(zBuffer, Integer.MAX_VALUE);
         Arrays.fill(frameBuffer, Color.white.getRGB());
         for (int[] face: item3D.getFaces()){
