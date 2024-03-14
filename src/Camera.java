@@ -14,9 +14,9 @@ public class Camera {
 
     private Vector3 lightDirection = new Vector3(0, 0, 1);
 
-    private int height = 512;
+    private final int height;
 
-    private int width = 512;
+    private final int width;
 
     private static JFrame frame;
 
@@ -25,11 +25,6 @@ public class Camera {
     private static BufferedImage bufferedImage;
 
     private static WritableRaster raster;
-
-    public Camera(){
-        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        raster = bufferedImage.getRaster();
-    }
 
     public Camera(int height, int width){
         this.height = height;
