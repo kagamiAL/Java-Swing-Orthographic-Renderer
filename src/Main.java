@@ -7,10 +7,10 @@ public class Main {
             Vector3 lookVector = new Vector3(0, 0, -1);
             double step = 0;
             while (true) {
-                lookVector.x = (float) (Math.sin(step) * 1.5);
+                lookVector.x = (float) (Math.sin(step) * 1);
                 camera.setLookVector(lookVector);
                 camera.render(item3D);
-                Thread.sleep(10);
+                Thread.sleep(1);
                 step += 0.01;
             }
         }
