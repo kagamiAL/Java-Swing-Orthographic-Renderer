@@ -1,9 +1,18 @@
 public class Main {
-    public static void main(String[] args) {
-        Item3D item3D = ParseOBJ.parseObjFile("icosahedron.obj");
+    public static void main(String[] args) throws InterruptedException {
+        Item3D item3D = ParseOBJ.parseObjFile("teapot.obj");
         if (item3D != null){
-            Camera camera = new Camera();
-            camera.render(item3D);
+            item3D.setScale(100);
+            Camera camera = new Camera(800, 800);
+            Vector3 lookVector = new Vector3(0, 0, -1);
+            double step = 0;
+            while (true) {
+                lookVector.x = (float) (Math.sin(step) * 1.5);
+                camera.setLookVector(lookVector);
+                camera.render(item3D);
+                Thread.sleep(10);
+                step += 0.01;
+            }
         }
     }
 }

@@ -3,15 +3,15 @@
  */
 public class Vector3 {
 
-    public double  x = 0;
+    public float  x = 0;
 
-    public double  y = 0;
+    public float  y = 0;
 
-    public double  z = 0;
+    public float  z = 0;
 
-    private double length = -1;
+    private float length = -1;
 
-    public Vector3(double x, double y, double z){
+    public Vector3(float x, float y, float z){
         this.x = x;
         this.y = y;
         this.z = z;
@@ -40,7 +40,7 @@ public class Vector3 {
      * @param scalar the scalar to multiply with
      * @return the new vector from this multiplication
      */
-    public Vector3 multiply(double scalar){
+    public Vector3 multiply(float scalar){
         return new Vector3(x * scalar, y * scalar, z * scalar);
     }
 
@@ -49,7 +49,7 @@ public class Vector3 {
      * @param other the vector to dot with
      * @return the dot product
      */
-    public double dot(Vector3 other){
+    public float dot(Vector3 other){
         return x * other.x + y * other.y + z * other.z;
     }
 
@@ -57,9 +57,9 @@ public class Vector3 {
      * Returns the length of the vector
      * @return the length of the vector
      */
-    public double length(){
+    public float length(){
         if (length == -1){
-            length = Math.sqrt(x*x + y*y + z*z);
+            length = (float) Math.sqrt(x*x + y*y + z*z);
         }
         return length;
     }
@@ -70,7 +70,7 @@ public class Vector3 {
      * @return the new projected vector
      */
     public Vector3 project(Vector3 other){
-        return other.multiply(dot(other)/Math.pow(other.length(), 2));
+        return other.multiply((float) (dot(other)/Math.pow(other.length(), 2)));
     }
 
     /**
@@ -92,10 +92,6 @@ public class Vector3 {
      */
     public Vector3 unit(){
         return new Vector3(x/length(), y/length(), z/length());
-    }
-
-    public double[] toArray(){
-        return new double[]{x, y, z};
     }
 
     /**
