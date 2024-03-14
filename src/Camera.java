@@ -10,17 +10,17 @@ public class Camera {
 
     public static final int GREY_MAX = 180;
 
-    private Vector3 lookVector = new Vector3(0, 0, -1);
+    private Vector3 lookVector = new Vector3(0, 0, 1);
 
     private Vector3 lightDirection = new Vector3(0, 0, 1);
 
-    private final double[][] projectionMatrix = {
+    private final float[][] projectionMatrix = {
             {0, 0, 0},
             {0, 0, 0},
             {0, 0, 0},
     };
 
-    private final double[][] identityMatrix = {
+    private final float[][] identityMatrix = {
             {1, 0, 0},
             {0, 1, 0},
             {0, 0, 1}
@@ -65,15 +65,15 @@ public class Camera {
         }else label.setIcon(new ImageIcon(image));
     }
 
-    private static double getDepthZ(Vector3 p1, Vector3 p2, Vector3 p3, double x, double y){
-        double det = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-        double l1  = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y))/det;
-        double l2 = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y))/det;
-        double l3 = 1. - l1 - l2;
+    private static float getDepthZ(Vector3 p1, Vector3 p2, Vector3 p3, float x, float y){
+        float det = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
+        float l1  = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y))/det;
+        float l2 = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y))/det;
+        float l3 = 1f - l1 - l2;
         return l1 * p1.z + l2 * p2.z + l3 * p3.z;
     }
 
-    private static boolean edgeFunction(Vector3 a, Vector3 b, double x, double y){
+    private static boolean edgeFunction(Vector3 a, Vector3 b, float x, float y){
         return (a.x - b.x) * (y - a.y) - (a.y - b.y) * (x - a.x) >= 0;
     }
 
@@ -83,11 +83,11 @@ public class Camera {
         return v.cross(u).unit();
     }
 
-    private static double[] getBoundingBoxMinMax(Vector3[] vertices, int[] face){
-        double minX = Integer.MAX_VALUE;
-        double minY = Integer.MAX_VALUE;
-        double maxX = Integer.MIN_VALUE;
-        double maxY = Integer.MIN_VALUE;
+    private static float[] getBoundingBoxMinMax(Vector3[] vertices, int[] face){
+        float minX = Integer.MAX_VALUE;
+        float minY = Integer.MAX_VALUE;
+        float maxX = Integer.MIN_VALUE;
+        float maxY = Integer.MIN_VALUE;
 
         for (int j : face) {
             Vector3 vertex = vertices[j];
@@ -97,7 +97,7 @@ public class Camera {
             if (vertex.y > maxY) maxY = vertex.y;
         }
 
-        return new double[]{minX, minY, maxX, maxY};
+        return new float[]{minX, minY, maxX, maxY};
     }
 
     private Vector3[] getProjectedVertices(Vector3[] vertices){
@@ -124,7 +124,7 @@ public class Camera {
     }
 
     private void calculateProjectionMatrix(){
-        double[] vector = lookVector.toArray();
+        float[] vector = lookVector.toArray();
         for (int x = 0; x < 3; x++){
             for (int y = 0; y < 3; y++){
                 projectionMatrix[x][y] = identityMatrix[x][y] - (vector[x]*vector[y]);
@@ -144,11 +144,11 @@ public class Camera {
         calculateProjectionMatrix();
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices());
         int[] frameBuffer = new int[width * height];
-        double[] zBuffer = new double[width * height];
+        float[] zBuffer = new float[width * height];
         Arrays.fill(zBuffer, Integer.MAX_VALUE);
         Arrays.fill(frameBuffer, Color.white.getRGB());
         for (int[] face: item3D.getFaces()){
-            double[] boxMinMax = getBoundingBoxMinMax(projectedVertices, face);
+            float[] boxMinMax = getBoundingBoxMinMax(projectedVertices, face);
             int xMin = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[0])));
             int yMin = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[1])));
             int xMax = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[2])));
@@ -160,7 +160,7 @@ public class Camera {
                     inside &= edgeFunction(projectedVertices[face[1]], projectedVertices[face[2]], x, y);
                     inside &= edgeFunction(projectedVertices[face[2]], projectedVertices[face[0]], x, y);
                     if (inside){
-                        double depth = getDepthZ(
+                        float depth = getDepthZ(
                                 projectedVertices[face[0]],
                                 projectedVertices[face[1]],
                                 projectedVertices[face[2]],

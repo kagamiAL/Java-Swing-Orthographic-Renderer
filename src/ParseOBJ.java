@@ -10,9 +10,9 @@ public class ParseOBJ {
 
     private static Vector3 parseVector3(String[] values){
         return new Vector3(
-                Double.parseDouble(values[0]),
-                Double.parseDouble(values[1]),
-                Double.parseDouble(values[2])
+                Float.parseFloat(values[0]),
+                Float.parseFloat(values[1]),
+                Float.parseFloat(values[2])
         );
     }
 
