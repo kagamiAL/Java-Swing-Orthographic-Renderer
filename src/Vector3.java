@@ -3,11 +3,11 @@
  */
 public class Vector3 {
 
-    public float  x = 0;
+    public float  x;
 
-    public float  y = 0;
+    public float  y;
 
-    public float  z = 0;
+    public float  z;
 
     private float length = -1;
 
@@ -15,15 +15,6 @@ public class Vector3 {
         this.x = x;
         this.y = y;
         this.z = z;
-    }
-
-    /**
-     * Adds a vector to another
-     * @param other the vector to add with
-     * @return the new vector resulting from this operation
-     */
-    public Vector3 add(Vector3 other){
-        return new Vector3(x + other.x, y + other.y, z + other.z);
     }
 
     /**
@@ -62,15 +53,6 @@ public class Vector3 {
             length = (float) Math.sqrt(x*x + y*y + z*z);
         }
         return length;
-    }
-
-    /**
-     * Projects this vector onto another vector, this is projected onto other
-     * @param other the vector to project onto
-     * @return the new projected vector
-     */
-    public Vector3 project(Vector3 other){
-        return other.multiply((float) (dot(other)/Math.pow(other.length(), 2)));
     }
 
     /**
