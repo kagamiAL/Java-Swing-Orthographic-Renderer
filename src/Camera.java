@@ -73,8 +73,8 @@ public class Camera {
         return l1 * p1.z + l2 * p2.z + l3 * p3.z;
     }
 
-    private static boolean edgeFunction(Vector3 a, Vector3 b, float x, float y){
-        return (a.x - b.x) * (y - a.y) - (a.y - b.y) * (x - a.x) >= 0;
+    private static float edgeFunction(Vector3 a, Vector3 b, float x, float y){
+        return (a.x - b.x) * (y - a.y) - (a.y - b.y) * (x - a.x);
     }
 
     private static Vector3 getFaceNormal(Vector3[] vertices, int[] face){
@@ -153,13 +153,25 @@ public class Camera {
             int yMin = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[1])));
             int xMax = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[2])));
             int yMax = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[3])));
+            Vector3 a = projectedVertices[face[0]];
+            Vector3 b = projectedVertices[face[1]];
+            Vector3 c = projectedVertices[face[2]];
+            float w0Step = -(a.y - b.y);
+            float w1Step = -(b.y - c.y);
+            float w2Step = -(c.y - a.y);
+            float w0YStep = (a.x - b.x);
+            float w1YStep = (b.x - c.x);
+            float w2YStep = (c.x - a.x);
+            float w0Initial = edgeFunction(a, b, xMin, yMin);
+            float w1Initial = edgeFunction(b, c, xMin, yMin);
+            float w2Initial = edgeFunction(c, a, xMin, yMin);
+
             for (int y = yMin; y <= yMax; y++){
+                float w0 = w0Initial;
+                float w1 = w1Initial;
+                float w2 = w2Initial;
                 for (int x = xMin; x <= xMax; x++){
-                    boolean inside = true;
-                    inside &= edgeFunction(projectedVertices[face[0]], projectedVertices[face[1]], x, y);
-                    inside &= edgeFunction(projectedVertices[face[1]], projectedVertices[face[2]], x, y);
-                    inside &= edgeFunction(projectedVertices[face[2]], projectedVertices[face[0]], x, y);
-                    if (inside){
+                    if (w0 >= 0 && w1 >= 0 && w2 >= 0){
                         float depth = getDepthZ(
                                 projectedVertices[face[0]],
                                 projectedVertices[face[1]],
@@ -176,7 +188,13 @@ public class Camera {
                             frameBuffer[y * width + x] = rgb;
                         }
                     }
+                    w0 += w0Step;
+                    w1 += w1Step;
+                    w2 += w2Step;
                 }
+                w0Initial += w0YStep;
+                w1Initial += w1YStep;
+                w2Initial += w2YStep;
             }
         }
         raster.setDataElements(0, 0, width, height, frameBuffer);
