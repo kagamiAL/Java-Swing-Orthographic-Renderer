@@ -14,17 +14,9 @@ public class Camera {
 
     private Vector3 lightDirection = new Vector3(0, 0, 1);
 
-    private final float[][] projectionMatrix = {
-            {0, 0, 0},
-            {0, 0, 0},
-            {0, 0, 0},
-    };
+    private final float[] projectionMatrix = new float[9];
 
-    private final float[][] identityMatrix = {
-            {1, 0, 0},
-            {0, 1, 0},
-            {0, 0, 1}
-    };
+    private final float[] identityMatrix = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
     private int height = 512;
 
@@ -117,17 +109,19 @@ public class Camera {
 
     private Vector3 getProjectedVector(Vector3 vertex){
         return new Vector3(
-                projectionMatrix[0][0] * vertex.x + projectionMatrix[0][1] * vertex.y + projectionMatrix[0][2] * vertex.z,
-                projectionMatrix[1][0] * vertex.x + projectionMatrix[1][1] * vertex.y + projectionMatrix[1][2] * vertex.z,
-                projectionMatrix[2][0] * vertex.x + projectionMatrix[2][1] * vertex.y + projectionMatrix[2][2] * vertex.z
+                projectionMatrix[0] * vertex.x + projectionMatrix[3] * vertex.y + projectionMatrix[6] * vertex.z,
+                projectionMatrix[1] * vertex.x + projectionMatrix[4] * vertex.y + projectionMatrix[7] * vertex.z,
+                projectionMatrix[2] * vertex.x + projectionMatrix[5] * vertex.y + projectionMatrix[8] * vertex.z
         );
     }
 
     private void calculateProjectionMatrix(){
         float[] vector = lookVector.toArray();
-        for (int x = 0; x < 3; x++){
-            for (int y = 0; y < 3; y++){
-                projectionMatrix[x][y] = identityMatrix[x][y] - (vector[x]*vector[y]);
+        int arrayMin = 0;
+        int arrayMax = 3;
+        for (int x = arrayMin; x < arrayMax; x++){
+            for (int y = arrayMin; y < arrayMax; y++){
+                projectionMatrix[x + y*arrayMax] = identityMatrix[x + y*arrayMax] - (vector[x]*vector[y]);
             }
         }
     }
