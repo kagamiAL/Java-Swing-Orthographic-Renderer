@@ -64,9 +64,9 @@ public class Face {
         this.projectedVertices = projectedVertices;
     }
 
-    public void setTexturePoints(ArrayList<Vector2> texturePoints2D, ArrayList<Integer> colorIndices) {
-        colorACoordinate = texturePoints2D.get(colorIndices.getFirst());
-        colorBCoordinate = texturePoints2D.get(colorIndices.get(1));
-        colorCCoordinate = texturePoints2D.get(colorIndices.get(2));
+    public void setTexturePoints(ArrayList<Vector2> texturePoints2D, int[] colorIndices) {
+        colorACoordinate = texturePoints2D.get(colorIndices[0]);
+        colorBCoordinate = texturePoints2D.get(colorIndices[1]);
+        colorCCoordinate = texturePoints2D.get(colorIndices[2]);
     }
 }
