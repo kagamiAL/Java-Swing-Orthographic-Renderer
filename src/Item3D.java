@@ -1,7 +1,5 @@
 public class Item3D {
 
-    private int scale = 1;
-
     private final Vector3[] vertices;
 
     private final int[][] faces;
@@ -24,7 +22,6 @@ public class Item3D {
     }
 
     public void setScale(int scale) {
-        this.scale = scale;
         for (int x = 0; x < vertices.length; x++){
             vertices[x] = vertices[x].multiply(scale);
         }
