@@ -71,14 +71,14 @@ public class Camera {
         return (a.x - b.x) * (y - a.y) - (a.y - b.y) * (x - a.x);
     }
 
-    private static float[] getBoundingBoxMinMax(Vector3[] vertices, int[] face) {
+    private static float[] getBoundingBoxMinMax(Face face) {
         float minX = Integer.MAX_VALUE;
         float minY = Integer.MAX_VALUE;
         float maxX = Integer.MIN_VALUE;
         float maxY = Integer.MIN_VALUE;
+        Vector3[] vertices = {face.getProjectedA(), face.getProjectedB(), face.getProjectedC()};
 
-        for (int j : face) {
-            Vector3 vertex = vertices[j];
+        for (Vector3 vertex: vertices) {
             if (vertex.x < minX)
                 minX = vertex.x;
             if (vertex.y < minY)
@@ -92,20 +92,16 @@ public class Camera {
         return new float[] { minX, minY, maxX, maxY };
     }
 
-    private Vector3[] getProjectedVertices(Vector3[] vertices) {
+    private void calculateProjectedVertices(Vector3[] vertices, Vector3[] projectedVertices) {
         int screenOriginX = width / 2 - 1;
         int screenOriginY = height / 2 - 1;
         Vector3 localRight = lookVector.cross(GLOBAL_UP).unit();
         Vector3 localUp = localRight.cross(lookVector).unit();
-        Vector3[] projectedVertices = new Vector3[vertices.length];
-
         for (int x = 0; x < vertices.length; x++) {
             Vector3 planeVertex = getProjectedVector(vertices[x]);
             projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex),
                     screenOriginY - localUp.dot(planeVertex), -vertices[x].z);
         }
-
-        return projectedVertices;
     }
 
     private Vector3 getProjectedVector(Vector3 vertex) {
@@ -126,9 +122,9 @@ public class Camera {
         }
     }
 
-    private float getBackFaceSign(int[] face, Vector3[] projectedVertices) {
-        Vector3 ab = projectedVertices[face[1]].sub(projectedVertices[face[0]]);
-        Vector3 ac = projectedVertices[face[2]].sub(projectedVertices[face[0]]);
+    private float getBackFaceSign(Face face) {
+        Vector3 ab = face.getProjectedB().sub(face.getProjectedA());
+        Vector3 ac = face.getProjectedC().sub(face.getProjectedA());
         return ab.x * ac.y - ac.x * ab.y;
     }
 
@@ -142,22 +138,21 @@ public class Camera {
 
     public void render(Item3D item3D) {
         calculateProjectionMatrix();
-        Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices());
+        calculateProjectedVertices(item3D.getVertices(), item3D.getProjectedVertices());
         Arrays.fill(zBuffer, Integer.MAX_VALUE);
         Arrays.fill(frameBuffer, Color.white.getRGB());
-        for (int i = 0; i < item3D.getFaces().length; i++) {
-            int[] face = item3D.getFaceAt(i);
-            if (getBackFaceSign(face, projectedVertices) >= 0) {
+        for (Face face: item3D.getFaces()) {
+            if (getBackFaceSign(face) >= 0) {
                 continue;
             }
-            float[] boxMinMax = getBoundingBoxMinMax(projectedVertices, face);
+            float[] boxMinMax = getBoundingBoxMinMax(face);
             int xMin = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[0])));
             int yMin = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[1])));
             int xMax = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[2])));
             int yMax = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[3])));
-            Vector3 a = projectedVertices[face[0]];
-            Vector3 b = projectedVertices[face[1]];
-            Vector3 c = projectedVertices[face[2]];
+            Vector3 a = face.getProjectedA();
+            Vector3 b = face.getProjectedB();
+            Vector3 c = face.getProjectedC();
             float w0Step = -(a.y - b.y);
             float w1Step = -(b.y - c.y);
             float w2Step = -(c.y - a.y);
@@ -175,13 +170,13 @@ public class Camera {
                 for (int x = xMin; x <= xMax; x++) {
                     if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
                         float depth = getDepthZ(
-                                projectedVertices[face[0]],
-                                projectedVertices[face[1]],
-                                projectedVertices[face[2]],
+                                a,
+                                b,
+                                c,
                                 x,
                                 y);
                         if (depth < zBuffer[y * width + x]) {
-                            int greyScale = (int) (Math.max(0, item3D.getFaceNormalAt(i).dot(lightDirection)) * GREY_MAX);
+                            int greyScale = (int) (Math.max(0, face.getFaceNormal().dot(lightDirection)) * GREY_MAX);
                             zBuffer[y * width + x] = depth;
                             frameBuffer[y * width + x] = new Color(greyScale, greyScale, greyScale).getRGB();
                         }
