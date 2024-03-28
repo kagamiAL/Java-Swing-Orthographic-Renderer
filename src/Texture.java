@@ -1,4 +1,5 @@
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Arrays;
@@ -32,6 +33,14 @@ public class Texture {
 
     public int getRGBAt(int x, int y){
         return image.getRGB(x, y);
+    }
+
+    public Color getVertexColor(double pixX, double pixY){
+        double pixelXCoordinate = pixX * getWidth() - 0.5;
+        double pixelYCoordinate = (1 - pixY) * getHeight() - 0.5;
+        int x = (int) Math.floor(pixelXCoordinate);
+        int y = (int) Math.floor(pixelYCoordinate);
+        return new Color(getRGBAt(x, y), true);
     }
 
     public int getWidth(){
