@@ -21,8 +21,6 @@ public class Item3D {
         }
     }
 
-    public int[][] getFaces() {
-
     public Face[] getFaces() {
         return faces;
     }
