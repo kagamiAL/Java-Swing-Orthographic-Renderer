@@ -176,9 +176,10 @@ public class Camera {
                                 x,
                                 y);
                         if (depth < zBuffer[y * width + x]) {
-                            int greyScale = (int) (Math.max(0, face.getFaceNormal().dot(lightDirection)) * GREY_MAX);
+                            //int greyScale = (int) (Math.max(0, face.getFaceNormal().dot(lightDirection)) * GREY_MAX);
+                            Color color = item3D.getColorAt(1);
                             zBuffer[y * width + x] = depth;
-                            frameBuffer[y * width + x] = new Color(greyScale, greyScale, greyScale).getRGB();
+                            frameBuffer[y * width + x] = color.getRGB();
                         }
                     }
                     w0 += w0Step;
