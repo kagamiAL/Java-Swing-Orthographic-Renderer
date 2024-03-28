@@ -29,11 +29,20 @@ public class ParseOBJ {
         return face;
     }
 
+    private static double[] parseVT(String[] values){
+        return new double[]{
+            Double.parseDouble(values[0]),
+            Double.parseDouble(values[1])
+        };
+    }
+
     public static Item3D parseObjFile(String pathName){
         File objFile = new File(pathName);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(objFile))){
             ArrayList<Vector3> vertices = new ArrayList<>();
             ArrayList<int[]> faces = new ArrayList<>();
+            ArrayList<double[]> vtPoints = new ArrayList<>();
+            Texture texture = null;
             String line;
             while ((line = bufferedReader.readLine()) != null){
                 if (!line.isEmpty()) {
@@ -41,10 +50,13 @@ public class ParseOBJ {
                     switch (values[0]){
                         case "v" -> vertices.add(parseVector3(Arrays.copyOfRange(values, 1, values.length)));
                         case "f" -> faces.add(parseFace(Arrays.copyOfRange(values, 1, values.length)));
+                        case "vt" -> vtPoints.add(parseVT(Arrays.copyOfRange(values, 1, values.length)));
+                        case "mtllib" -> texture = Texture.parseMTL(new File(objFile.getParentFile(), values[1]));
                     }
                 }
             }
-            return new Item3D(vertices.toArray(new Vector3[0]), faces.toArray(new int[0][3]));
+            Item3D item3D = new Item3D(vertices.toArray(new Vector3[0]), faces.toArray(new int[0][3]));
+            return item3D;
         } catch (IOException e){
             System.out.println("Could not parse file!");
         }
