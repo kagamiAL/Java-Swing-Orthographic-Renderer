@@ -56,6 +56,9 @@ public class ParseOBJ {
                 }
             }
             Item3D item3D = new Item3D(vertices.toArray(new Vector3[0]), faces.toArray(new int[0][3]));
+            if (texture != null){
+                item3D.setTexture(texture, vtPoints);
+            }
             return item3D;
         } catch (IOException e){
             System.out.println("Could not parse file!");
