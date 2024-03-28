@@ -24,18 +24,6 @@ public class Face {
         faceNormal = getFaceNormal(vertices, face);
     }
 
-    public int getIndexA() {
-        return indexA;
-    }
-
-    public int getIndexB() {
-        return indexB;
-    }
-
-    public int getIndexC() {
-        return indexC;
-    }
-
     public Vector3 getProjectedA() {
         return projectedVertices[indexA];
     }
