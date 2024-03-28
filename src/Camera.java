@@ -37,7 +37,7 @@ public class Camera {
     public Camera(int height, int width) {
         this.height = height;
         this.width = width;
-        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         raster = bufferedImage.getRaster();
         frameBuffer = new int[width * height];
         zBuffer = new float[frameBuffer.length];
@@ -182,11 +182,8 @@ public class Camera {
                                 y);
                         if (depth < zBuffer[y * width + x]) {
                             int greyScale = (int) (Math.max(0, item3D.getFaceNormalAt(i).dot(lightDirection)) * GREY_MAX);
-                            int rgb = greyScale;
-                            rgb = (rgb << 8) + greyScale;
-                            rgb = (rgb << 8) + greyScale;
                             zBuffer[y * width + x] = depth;
-                            frameBuffer[y * width + x] = rgb;
+                            frameBuffer[y * width + x] = new Color(greyScale, greyScale, greyScale).getRGB();
                         }
                     }
                     w0 += w0Step;
