@@ -22,9 +22,9 @@ public class Camera {
 
     private final float[] zBuffer;
 
-    private int height = 512;
+    private final int height;
 
-    private int width = 512;
+    private final int width;
 
     private static JFrame frame;
 
@@ -69,12 +69,6 @@ public class Camera {
 
     private static float edgeFunction(Vector3 a, Vector3 b, float x, float y) {
         return (a.x - b.x) * (y - a.y) - (a.y - b.y) * (x - a.x);
-    }
-
-    private static Vector3 getFaceNormal(Vector3[] vertices, int[] face) {
-        Vector3 v = vertices[face[1]].sub(vertices[face[0]]);
-        Vector3 u = vertices[face[2]].sub(vertices[face[0]]);
-        return v.cross(u).unit();
     }
 
     private static float[] getBoundingBoxMinMax(Vector3[] vertices, int[] face) {
@@ -151,7 +145,8 @@ public class Camera {
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices());
         Arrays.fill(zBuffer, Integer.MAX_VALUE);
         Arrays.fill(frameBuffer, Color.white.getRGB());
-        for (int[] face : item3D.getFaces()) {
+        for (int i = 0; i < item3D.getFaces().length; i++) {
+            int[] face = item3D.getFaceAt(i);
             if (getBackFaceSign(face, projectedVertices) >= 0) {
                 continue;
             }
@@ -186,8 +181,7 @@ public class Camera {
                                 x,
                                 y);
                         if (depth < zBuffer[y * width + x]) {
-                            int greyScale = (int) (Math.max(0,
-                                    getFaceNormal(item3D.getVertices(), face).dot(lightDirection)) * GREY_MAX);
+                            int greyScale = (int) (Math.max(0, item3D.getFaceNormalAt(i).dot(lightDirection)) * GREY_MAX);
                             int rgb = greyScale;
                             rgb = (rgb << 8) + greyScale;
                             rgb = (rgb << 8) + greyScale;
