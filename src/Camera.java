@@ -16,7 +16,7 @@ public class Camera {
 
     private final float[] projectionMatrix = new float[9];
 
-    private final float[] identityMatrix = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+    private final float[] identityMatrix = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
 
     private final int[] frameBuffer;
 
@@ -34,7 +34,7 @@ public class Camera {
 
     private static WritableRaster raster;
 
-    public Camera(int height, int width){
+    public Camera(int height, int width) {
         this.height = height;
         this.width = width;
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -43,40 +43,41 @@ public class Camera {
         zBuffer = new float[frameBuffer.length];
     }
 
-    private static void display(BufferedImage image){
-        if(frame==null){
-            frame=new JFrame();
+    private static void display(BufferedImage image) {
+        if (frame == null) {
+            frame = new JFrame();
             frame.setTitle("this_might_be_epic");
             frame.setSize(image.getWidth(), image.getHeight());
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            label=new JLabel();
+            label = new JLabel();
             label.setIcon(new ImageIcon(image));
-            frame.getContentPane().add(label,BorderLayout.CENTER);
+            frame.getContentPane().add(label, BorderLayout.CENTER);
             frame.setLocationRelativeTo(null);
             frame.pack();
             frame.setVisible(true);
-        }else label.setIcon(new ImageIcon(image));
+        } else
+            label.setIcon(new ImageIcon(image));
     }
 
-    private static float getDepthZ(Vector3 p1, Vector3 p2, Vector3 p3, float x, float y){
+    private static float getDepthZ(Vector3 p1, Vector3 p2, Vector3 p3, float x, float y) {
         float det = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
-        float l1  = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y))/det;
-        float l2 = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y))/det;
+        float l1 = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y)) / det;
+        float l2 = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y)) / det;
         float l3 = 1f - l1 - l2;
         return l1 * p1.z + l2 * p2.z + l3 * p3.z;
     }
 
-    private static float edgeFunction(Vector3 a, Vector3 b, float x, float y){
+    private static float edgeFunction(Vector3 a, Vector3 b, float x, float y) {
         return (a.x - b.x) * (y - a.y) - (a.y - b.y) * (x - a.x);
     }
 
-    private static Vector3 getFaceNormal(Vector3[] vertices, int[] face){
+    private static Vector3 getFaceNormal(Vector3[] vertices, int[] face) {
         Vector3 v = vertices[face[1]].sub(vertices[face[0]]);
         Vector3 u = vertices[face[2]].sub(vertices[face[0]]);
         return v.cross(u).unit();
     }
 
-    private static float[] getBoundingBoxMinMax(Vector3[] vertices, int[] face){
+    private static float[] getBoundingBoxMinMax(Vector3[] vertices, int[] face) {
         float minX = Integer.MAX_VALUE;
         float minY = Integer.MAX_VALUE;
         float maxX = Integer.MIN_VALUE;
@@ -84,47 +85,57 @@ public class Camera {
 
         for (int j : face) {
             Vector3 vertex = vertices[j];
-            if (vertex.x < minX) minX = vertex.x;
-            if (vertex.y < minY) minY = vertex.y;
-            if (vertex.x > maxX) maxX = vertex.x;
-            if (vertex.y > maxY) maxY = vertex.y;
+            if (vertex.x < minX)
+                minX = vertex.x;
+            if (vertex.y < minY)
+                minY = vertex.y;
+            if (vertex.x > maxX)
+                maxX = vertex.x;
+            if (vertex.y > maxY)
+                maxY = vertex.y;
         }
 
-        return new float[]{minX, minY, maxX, maxY};
+        return new float[] { minX, minY, maxX, maxY };
     }
 
-    private Vector3[] getProjectedVertices(Vector3[] vertices){
-        int screenOriginX = width/2 - 1;
-        int screenOriginY = height/2 - 1;
+    private Vector3[] getProjectedVertices(Vector3[] vertices) {
+        int screenOriginX = width / 2 - 1;
+        int screenOriginY = height / 2 - 1;
         Vector3 localRight = lookVector.cross(GLOBAL_UP).unit();
         Vector3 localUp = localRight.cross(lookVector).unit();
         Vector3[] projectedVertices = new Vector3[vertices.length];
 
         for (int x = 0; x < vertices.length; x++) {
             Vector3 planeVertex = getProjectedVector(vertices[x]);
-            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex), screenOriginY - localUp.dot(planeVertex), -vertices[x].z);
+            projectedVertices[x] = new Vector3(screenOriginX + localRight.dot(planeVertex),
+                    screenOriginY - localUp.dot(planeVertex), -vertices[x].z);
         }
 
         return projectedVertices;
     }
 
-    private Vector3 getProjectedVector(Vector3 vertex){
+    private Vector3 getProjectedVector(Vector3 vertex) {
         return new Vector3(
                 projectionMatrix[0] * vertex.x + projectionMatrix[3] * vertex.y + projectionMatrix[6] * vertex.z,
                 projectionMatrix[1] * vertex.x + projectionMatrix[4] * vertex.y + projectionMatrix[7] * vertex.z,
-                projectionMatrix[2] * vertex.x + projectionMatrix[5] * vertex.y + projectionMatrix[8] * vertex.z
-        );
+                projectionMatrix[2] * vertex.x + projectionMatrix[5] * vertex.y + projectionMatrix[8] * vertex.z);
     }
 
-    private void calculateProjectionMatrix(){
+    private void calculateProjectionMatrix() {
         float[] vector = lookVector.toArray();
         int arrayMin = 0;
         int arrayMax = 3;
-        for (int x = arrayMin; x < arrayMax; x++){
-            for (int y = arrayMin; y < arrayMax; y++){
-                projectionMatrix[x + y*arrayMax] = identityMatrix[x + y*arrayMax] - (vector[x]*vector[y]);
+        for (int x = arrayMin; x < arrayMax; x++) {
+            for (int y = arrayMin; y < arrayMax; y++) {
+                projectionMatrix[x + y * arrayMax] = identityMatrix[x + y * arrayMax] - (vector[x] * vector[y]);
             }
         }
+    }
+
+    private float getBackFaceSign(int[] face, Vector3[] projectedVertices) {
+        Vector3 ab = projectedVertices[face[1]].sub(projectedVertices[face[0]]);
+        Vector3 ac = projectedVertices[face[2]].sub(projectedVertices[face[0]]);
+        return ab.x * ac.y - ac.x * ab.y;
     }
 
     public void setLookVector(Vector3 lookVector) {
@@ -135,12 +146,15 @@ public class Camera {
         this.lightDirection = lightDirection;
     }
 
-    public void render(Item3D item3D){
+    public void render(Item3D item3D) {
         calculateProjectionMatrix();
         Vector3[] projectedVertices = getProjectedVertices(item3D.getVertices());
         Arrays.fill(zBuffer, Integer.MAX_VALUE);
         Arrays.fill(frameBuffer, Color.white.getRGB());
-        for (int[] face: item3D.getFaces()){
+        for (int[] face : item3D.getFaces()) {
+            if (getBackFaceSign(face, projectedVertices) >= 0) {
+                continue;
+            }
             float[] boxMinMax = getBoundingBoxMinMax(projectedVertices, face);
             int xMin = (int) Math.max(0, Math.min(width - 1, Math.floor(boxMinMax[0])));
             int yMin = (int) Math.max(0, Math.min(height - 1, Math.floor(boxMinMax[1])));
@@ -159,21 +173,21 @@ public class Camera {
             float w1Initial = edgeFunction(b, c, xMin, yMin);
             float w2Initial = edgeFunction(c, a, xMin, yMin);
 
-            for (int y = yMin; y <= yMax; y++){
+            for (int y = yMin; y <= yMax; y++) {
                 float w0 = w0Initial;
                 float w1 = w1Initial;
                 float w2 = w2Initial;
-                for (int x = xMin; x <= xMax; x++){
-                    if (w0 >= 0 && w1 >= 0 && w2 >= 0){
+                for (int x = xMin; x <= xMax; x++) {
+                    if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
                         float depth = getDepthZ(
                                 projectedVertices[face[0]],
                                 projectedVertices[face[1]],
                                 projectedVertices[face[2]],
                                 x,
-                                y
-                        );
-                        if (depth < zBuffer[y * width + x]){
-                            int greyScale = (int)(Math.max(0, getFaceNormal(item3D.getVertices(), face).dot(lightDirection))*GREY_MAX);
+                                y);
+                        if (depth < zBuffer[y * width + x]) {
+                            int greyScale = (int) (Math.max(0,
+                                    getFaceNormal(item3D.getVertices(), face).dot(lightDirection)) * GREY_MAX);
                             int rgb = greyScale;
                             rgb = (rgb << 8) + greyScale;
                             rgb = (rgb << 8) + greyScale;
