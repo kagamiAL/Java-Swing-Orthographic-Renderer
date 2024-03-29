@@ -8,12 +8,15 @@ public class Texture {
 
     private final BufferedImage image;
 
+    private final int[] rgbArray;
+
     private static String[] splitValues(String values){
         return values.trim().split("\\s+");
     }
 
     public Texture(BufferedImage image) {
         this.image = image;
+        rgbArray = image.getRGB(0, 0, getWidth(), getHeight(), null, 0, getWidth());
     }
 
     public static Texture parseMTL(File mtlFile){
@@ -32,15 +35,15 @@ public class Texture {
     }
 
     public int getRGBAt(int x, int y){
-        return image.getRGB(x, y);
+        return rgbArray[y * getWidth() + x];
     }
 
-    public Color getVertexColor(double pixX, double pixY){
+    public int getVertexColor(double pixX, double pixY){
         double pixelXCoordinate = pixX * getWidth() - 0.5;
         double pixelYCoordinate = (1 - pixY) * getHeight() - 0.5;
         int x = (int) Math.floor(pixelXCoordinate);
         int y = (int) Math.floor(pixelYCoordinate);
-        return new Color(getRGBAt(x, y), true);
+        return getRGBAt(x, y);
     }
 
     public int getWidth(){

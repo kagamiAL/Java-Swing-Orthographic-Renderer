@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 public class Camera {
 
-    public static final Vector3 GLOBAL_UP = new Vector3(0, 1, 0);
+    private static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
 
-    public static final int GREY_MAX = 180;
+    public static final Vector3 GLOBAL_UP = new Vector3(0, 1, 0);
 
     private Vector3 lookVector = new Vector3(0, 0, 1);
 
@@ -128,8 +128,30 @@ public class Camera {
         return ab.x * ac.y - ac.x * ab.y;
     }
 
+    private int getPixelColor(Item3D item3D, Face face, float w0, float w1, float w2){
+        Texture texture = item3D.getTexture();
+        if (texture != null) {
+            Vector2 coordinates = face.getColorACoordinate().mul(w0).add(face.getColorBCoordinate().mul(w1)).add(face.getColorCCoordinate().mul(w2));
+            return texture.getVertexColor(coordinates.x, coordinates.y);
+        }
+        return DEFAULT_COLOR.getRGB();
+    }
+
     public void setLookVector(Vector3 lookVector) {
         this.lookVector = lookVector;
+    }
+
+    public int interpolateColor(int color, float t){
+        int r = (color>>16)&0xFF;
+        int g = (color>>8)&0xFF;
+        int b = (color)&0xFF;
+        int a = (color>>24)&0xFF;
+        return new Color(
+                (int)(r - (r*t)),
+                (int)(g - (g*t)),
+                (int)(b - (b*t)),
+                a
+        ).getRGB();
     }
 
     public void setLightDirection(Vector3 lightDirection) {
@@ -153,6 +175,7 @@ public class Camera {
             Vector3 a = face.getProjectedA();
             Vector3 b = face.getProjectedB();
             Vector3 c = face.getProjectedC();
+            float area = edgeFunction(a, b, c.x, c.y); // Area of the triangle multiplied by 2
             float w0Step = -(a.y - b.y);
             float w1Step = -(b.y - c.y);
             float w2Step = -(c.y - a.y);
@@ -176,10 +199,17 @@ public class Camera {
                                 x,
                                 y);
                         if (depth < zBuffer[y * width + x]) {
-                            //int greyScale = (int) (Math.max(0, face.getFaceNormal().dot(lightDirection)) * GREY_MAX);
-                            Color color = item3D.getColorAt(1);
                             zBuffer[y * width + x] = depth;
-                            frameBuffer[y * width + x] = color.getRGB();
+                            frameBuffer[y * width + x] = interpolateColor(
+                                    getPixelColor(
+                                            item3D,
+                                            face,
+                                            w0/area,
+                                            w1/area,
+                                            w2/area
+                                    ),
+                                    Math.clamp(1 - face.getFaceNormal().dot(lightDirection), 0, 1)
+                            );
                         }
                     }
                     w0 += w0Step;
