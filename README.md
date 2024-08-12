@@ -2,7 +2,7 @@
 
 ***
 
-##Description
+## Description
 
 ***
 
@@ -10,7 +10,7 @@ A simple orthographic renderer which uses rasterization made with Java swift. Ab
 
 ***
 
-##Authors
+## Authors
 
 ***
 
