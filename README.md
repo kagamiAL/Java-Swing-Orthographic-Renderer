@@ -1,8 +1,8 @@
-# Java Swift Orthographic Renderer
+# Java Swing Orthographic Renderer
 
 ## Description
 
-A simple orthographic renderer which uses rasterization made with Java swift. Able to render .obj files with strictly triangular faces along with their textures. 
+A simple orthographic renderer which uses rasterization made with Java swing. Able to render .obj files with strictly triangular faces along with their textures. 
 
 ## Authors
 
